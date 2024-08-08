@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      canvas {
+        width: 200px;
+        height: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="name"></div>
+    <div style="position: relative; width: 250px; height: 250px">
+      <canvas id="myRadarChart"></canvas>
+    </div>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      // グローバル変数の定義
+      let sakeArray = [];
+      let sakeTasteArray = [];
+
+      async function fetchData() {
+        const requestUrl = "http://localhost:3000/proxy/brands";
+        try {
+          const response = await axios.get(requestUrl);
+          const jsonData = response.data;
+          console.log(jsonData);
+          sakeArray = jsonData.brands; // グローバル変数に代入
+          console.log(sakeArray);
+          // データを使った処理をここに追加
+        } catch (error) {
+          console.error("Error fetching data: ", error);
+          // エラー処理をここに追加
+        } finally {
+          console.log("done!");
+        }
+      }
+
+      async function fetchFlavorCharts() {
+        const requestUrl = "http://localhost:3000/proxy/flavor-charts";
+        try {
+          const response = await axios.get(requestUrl);
+          const jsonData = response.data;
+          console.log(jsonData);
+          sakeTasteArray = jsonData.flavorCharts; // グローバル変数に代入
+          console.log(sakeTasteArray);
+          // データを使った処理をここに追加
+        } catch (error) {
+          console.error("Error fetching flavor charts data: ", error);
+          // エラー処理をここに追加
+        } finally {
+          console.log("done fetching flavor charts data!");
+        }
+      }
+  async function init() {
+        await fetchData();
+        await fetchFlavorCharts();
+
+        const pictureSakeName = "男山";
+
+        const sakeData = sakeArray.find((sake) => sake.name === pictureSakeName);
+
+        console.log(sakeData);
+
+        const pictureSakeId=sakeData.breweryId;
+        console.log(pictureSakeId);
+
+        // データオブジェクト
+        const data = {
+          f1: 0.27268907416579063,
+          f2: 0.5133687173652772,
+          f3: 0.31365136745780464,
+          f4: 0.423292021958669,
+          f5: 0.45955562755224805,
+          f6: 0.41635145956797676,
+        };
+      // データのラベルと値を設定
+      const labels = ["華やか", "芳醇", "重厚", "穏やか", "ドライ", "軽快"];
+      const values = [data.f1, data.f2, data.f3, data.f4, data.f5, data.f6];
+
+      // Chart.jsを使ってレーダーチャートを作成
+      const canvas = document.getElementById("myRadarChart");
+      const ctx = canvas.getContext("2d");
+      const myRadarChart = new Chart(ctx, {
+        type: "radar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "味のプロファイル",
+              data: values,
+              backgroundColor: "rgba(54, 162, 235, 0.2)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            r: {
+              angleLines: {
+                display: true,
+              },
+              grid: {
+                display: false,
+              },
+              ticks: {
+                display: false,
+              },
+              suggestedMin: 0,
+              suggestedMax: 1,
+            },
+          },
+        },
+      });
+    }
+
+    init();
+    </script>
+  </body>
+</html>
